@@ -13,6 +13,13 @@ add metadata block of script follow the format:
 // @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/GMwrap.js
 // ==/UserScript==
 
+＊see samples for details.
+
+other infomation.
+OAuth for Greasemonkey for Greasemonkey
+http://userscripts.org/scripts/show/78102
+OAuth for Greasemonkeyのラッパーライブラリ | Web scratch
+http://efcl.info/2010/0610/res1721/
 
 // OAuth for Greasemonkey
 // The MIT License
