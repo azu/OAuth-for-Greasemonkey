@@ -72,7 +72,7 @@ TwitterOauth.prototype = {
     getRequestToken : function(callback){
         var message = {
           method: "GET",
-          action: "https://twitter.com/oauth/request_token",
+          action: "https://api.twitter.com/oauth/request_token",
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
             oauth_consumer_key: this.accessor.consumerKey
@@ -93,7 +93,7 @@ TwitterOauth.prototype = {
                 self.request.tokenSecret = parameter["oauth_token_secret"];
                 // requestURLを引数にcallback
                 if(callback){
-                    callback("https://twitter.com/oauth/authorize?oauth_token="+self.request.token);
+                    callback("https://api.twitter.com/oauth/authorize?oauth_token="+self.request.token);
                 }
             }else{
                 alert(d.statusText);
@@ -107,7 +107,7 @@ TwitterOauth.prototype = {
     getAccessToken : function(pin ,callback) {
         var message = {
           method: "GET",
-          action: "https://twitter.com/oauth/access_token",
+          action: "https://api.twitter.com/oauth/access_token",
           parameters: {
             oauth_signature_method: "HMAC-SHA1",
             oauth_consumer_key: this.accessor.consumerKey,
