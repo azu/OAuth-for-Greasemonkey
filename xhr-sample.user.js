@@ -2,9 +2,9 @@
 // @name           twitter OAuth test
 // @namespace      http://efcl.info/
 // @include        *
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/oauth.js
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/sha1.js
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/GMwrap.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/oauth.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/sha1.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/GMwrap.js
 // @resource       oauthbutton http://a0.twimg.com/images/dev/buttons/sign-in-with-twitter-d.png
 // ==/UserScript==
 alert("Check User Script Commands!");
