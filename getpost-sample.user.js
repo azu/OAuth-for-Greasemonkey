@@ -2,9 +2,9 @@
 // @name           OAuth for Greasemonkey sample
 // @namespace      http://efcl.info/
 // @include        http://*
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/oauth.js
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/sha1.js
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/GMwrap.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/oauth.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/sha1.js
+// @require https://raw.github.com/azu/OAuth-for-Greasemonkey/master/GMwrap.js
 // ==/UserScript==
 // http://userscripts.org/scripts/show/78102
 /*認証手順
