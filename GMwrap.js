@@ -1,10 +1,3 @@
-var GM_OAuth = <><![CDATA[
-// ==UserScript==
-// @name oauth for Greasemonkey
-// @namespace http://efcl.info/
-// @include http://*
-// ==/UserScript==
-]]></>;
 /* dependence
   OAuth.js
   SHA-1.js
@@ -31,7 +24,7 @@ TwitterOauth.prototype = {
         consumerKey : "",
         consumerSecret: "",
         token: "", // response access_token
-        tokenSecret: "", // response access_token_secret
+        tokenSecret: "" // response access_token_secret
     },
     // temp for request
     request : {
@@ -41,11 +34,7 @@ TwitterOauth.prototype = {
     // return boolean - トークンが取得済みかの真偽値を返す
     isAuthorize : function(){
         var accessor = this.accessor;
-        if(accessor.consumerKey && accessor.consumerSecret && accessor.token && accessor.tokenSecret){
-            return true;
-        }else{
-            return false;
-        }
+        return accessor.consumerKey && accessor.consumerSecret && accessor.token && accessor.tokenSecret;
     },
     // return parsed Accessor
     getAccessor : function(){
@@ -63,7 +52,7 @@ TwitterOauth.prototype = {
     deleteAccessor : function(){
         var clientInfo = {
             consumerKey: this.accessor.consumerKey,
-            consumerSecret: this.accessor.consumerSecret,
+            consumerSecret: this.accessor.consumerSecret
         }
         GM_deleteValue("OAuthAccessor");
         this.initialize(clientInfo);
@@ -98,7 +87,7 @@ TwitterOauth.prototype = {
             }else{
                 alert(d.statusText);
             }
-          },
+          }
         };
         GM_xmlhttpRequest(options);
 
@@ -137,7 +126,7 @@ TwitterOauth.prototype = {
             }else{
                 alert(d.statusText);
             }
-          },
+          }
         };
 
         GM_xmlhttpRequest(options);
@@ -168,7 +157,7 @@ TwitterOauth.prototype = {
             }else{
                 callback(d.statusText);
             }
-          },
+          }
         };
         GM_xmlhttpRequest(options);
     },
@@ -294,7 +283,7 @@ TwitterOauth.prototype = {
         if(typeof(str) == 'undefined') return par;
         if(str.indexOf('?', 0) > -1){
             str = str.split('?')[1]
-        };
+        }
         str = str.split('&');
         for(var i = 0; str.length > i; i++){
             itm = str[i].split("=");
