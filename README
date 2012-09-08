@@ -8,9 +8,9 @@ add metadata block of script follow the format:
 // @name           your script name
 // @namespace      http://yournamespace/
 // @include        http://*
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/oauth.js
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/sha1.js
-// @require        http://github.com/azu/OAuth-for-Greasemonkey/raw/master/GMwrap.js
+// @require        https://raw.github.com/azu/OAuth-for-Greasemonkey/master/oauth.js
+// @require        https://raw.github.com/azu/OAuth-for-Greasemonkey/master/sha1.js
+// @require        https://raw.github.com/azu/OAuth-for-Greasemonkey/master/GMwrap.js
 // ==/UserScript==
 
 ＊see samples for details.
@@ -24,7 +24,7 @@ http://efcl.info/2010/0610/res1721/
 // OAuth for Greasemonkey
 // The MIT License
 //
-// Copyright (c) <2010> <azu>
+// Copyright (c) <2012> <azu>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
