@@ -5,175 +5,206 @@
 */
 
 // TwitterOauth for Greasemonkey
-function TwitterOauth(){
+function TwitterOauth() {
     this.initialize.apply(this, arguments);
 }
 TwitterOauth.prototype = {
-    initialize: function(con) {
+    initialize: function (con) {
         var accessor = this.getAccessor();
-        if(accessor){
+        if (accessor) {
             this.accessor = accessor;
-        }else{
+        } else {
             this.accessor.consumerKey = con.consumerKey;
             this.accessor.consumerSecret = con.consumerSecret;
             this.accessor.token = "";
             this.accessor.tokenSecret = "";
         }
     },
-    accessor : {
-        consumerKey : "",
+    accessor: {
+        consumerKey: "",
         consumerSecret: "",
         token: "", // response access_token
         tokenSecret: "" // response access_token_secret
     },
     // temp for request
-    request : {
-        token :"",// response oauth_token
+    request: {
+        token: "",// response oauth_token
         tokenSecret: ""// response oauth_token_secret
     },
     // return boolean - トークンが取得済みかの真偽値を返す
-    isAuthorize : function(){
+    isAuthorize: function () {
         var accessor = this.accessor;
         return accessor.consumerKey && accessor.consumerSecret && accessor.token && accessor.tokenSecret;
     },
     // return parsed Accessor
-    getAccessor : function(){
+    getAccessor: function () {
         var accessor = GM_getValue("OAuthAccessor", null);
-        if(accessor){
+        if (accessor) {
             return JSON.parse(accessor);
-        }else{
+        } else {
             return false;
         }
     },
     // save received Access token - 取得したトークンを保存
-    saveAccessor : function(){
-        GM_setValue("OAuthAccessor",JSON.stringify(this.accessor));
+    saveAccessor: function () {
+        GM_setValue("OAuthAccessor", JSON.stringify(this.accessor));
     },
-    deleteAccessor : function(){
+    deleteAccessor: function () {
         var clientInfo = {
             consumerKey: this.accessor.consumerKey,
             consumerSecret: this.accessor.consumerSecret
-        }
+        };
         GM_deleteValue("OAuthAccessor");
         this.initialize(clientInfo);
     },
     // 認証ページのURLを取得
-    getRequestToken : function(callback){
+    getRequestToken: function (callback) {
         var message = {
-          method: "GET",
-          action: "https://api.twitter.com/oauth/request_token",
-          parameters: {
-            oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.consumerKey
-          }
+            method: "GET",
+            action: "https://api.twitter.com/oauth/request_token",
+            parameters: {
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_consumer_key: this.accessor.consumerKey
+            }
         };
         OAuth.setTimestampAndNonce(message);
         OAuth.SignatureMethod.sign(message, this.accessor);
         var target = OAuth.addToURL(message.action, message.parameters);
         var self = this;
         var options = {
-          method: message.method,
-          url: target,
-          onload: function(d) {
-            if(d.status == 200){
-                var res = d.responseText;
-                var parameter = self.getParameter(res);
-                self.request.token = parameter["oauth_token"];
-                self.request.tokenSecret = parameter["oauth_token_secret"];
-                // requestURLを引数にcallback
-                if(callback){
-                    callback("https://api.twitter.com/oauth/authorize?oauth_token="+self.request.token);
+            method: message.method,
+            url: target,
+            onload: function (d) {
+                if (d.status == 200) {
+                    var res = d.responseText;
+                    var parameter = self.getParameter(res);
+                    self.request.token = parameter["oauth_token"];
+                    self.request.tokenSecret = parameter["oauth_token_secret"];
+                    // requestURLを引数にcallback
+                    if (callback) {
+                        callback("https://api.twitter.com/oauth/authorize?oauth_token=" + self.request.token);
+                    }
+                } else {
+                    alert(d.statusText);
                 }
-            }else{
-                alert(d.statusText);
             }
-          }
         };
         GM_xmlhttpRequest(options);
 
     },
     // pinを元にAccess Tokenを取得して保存、callbackにはaccessorオブジェクトを渡す
-    getAccessToken : function(pin ,callback) {
+    getAccessToken: function (pin, callback) {
         var message = {
-          method: "GET",
-          action: "https://api.twitter.com/oauth/access_token",
-          parameters: {
-            oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.consumerKey,
-            oauth_token: this.request.token, // Request Token
-            oauth_verifier: pin
-          }
+            method: "GET",
+            action: "https://api.twitter.com/oauth/access_token",
+            parameters: {
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_consumer_key: this.accessor.consumerKey,
+                oauth_token: this.request.token, // Request Token
+                oauth_verifier: pin
+            }
         };
         OAuth.setTimestampAndNonce(message);
         OAuth.SignatureMethod.sign(message, this.request);
         var target = OAuth.addToURL(message.action, message.parameters);
         var self = this;
         var options = {
-          method: message.method,
-          url: target,
-          onload: function(d) {
-            if(d.status == 200){
-                /* 返り値からAccess Token/Access Token Secretを取り出す */
-                var res = d.responseText;
-                var parameter = self.getParameter(res);
-                self.accessor.token = parameter["oauth_token"];
-                self.accessor.tokenSecret = parameter["oauth_token_secret"];
-                // Accessorの保存
-                self.saveAccessor();
-                if(callback){
-                    callback(self.accessor);
+            method: message.method,
+            url: target,
+            onload: function (d) {
+                if (d.status == 200) {
+                    /* 返り値からAccess Token/Access Token Secretを取り出す */
+                    var res = d.responseText;
+                    var parameter = self.getParameter(res);
+                    self.accessor.token = parameter["oauth_token"];
+                    self.accessor.tokenSecret = parameter["oauth_token_secret"];
+                    // Accessorの保存
+                    self.saveAccessor();
+                    if (callback) {
+                        callback(self.accessor);
+                    }
+                } else {
+                    alert(d.statusText);
                 }
-            }else{
-                alert(d.statusText);
             }
-          }
         };
 
         GM_xmlhttpRequest(options);
     },
+    // DEPRECATED : use `getURL`
     // api+?+query にアクセスした結果をcallbackに渡す
-    get : function(api, query, callback) {
-        var btquery = (query)? "?"+this.buildQuery(query) : "";
+    get: function (api, query, callback) {
+        var btquery = (query) ? "?" + this.buildQuery(query) : "";
         var message = {
-          method: "GET",
-          action: api + btquery,
-          parameters: {
-            oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.consumerKey,// queryの構築
-            oauth_token: this.accessor.token // Access Token
-          }
+            method: "GET",
+            action: api + btquery,
+            parameters: {
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_consumer_key: this.accessor.consumerKey,// queryの構築
+                oauth_token: this.accessor.token // Access Token
+            }
         };
         OAuth.setTimestampAndNonce(message);
         OAuth.SignatureMethod.sign(message, this.accessor);
         var target = OAuth.addToURL(message.action, message.parameters);
         var options = {
-          method: message.method,
-          url: target,
-          onload: function(d) {
-            if(d.status == 200){
-                if(callback){
-                    callback(d.responseText);
+            method: message.method,
+            url: target,
+            onload: function (d) {
+                if (d.status == 200) {
+                    if (callback) {
+                        callback(d.responseText);
+                    }
+                } else {
+                    callback(d.statusText);
                 }
-            }else{
-                callback(d.statusText);
             }
-          }
         };
         GM_xmlhttpRequest(options);
     },
-    post : function(api, content, callback) {
+    getURL: function (api, query, callback) {
+        if (callback == null) {
+            throw new Error("must to set callback");
+        }
+        var btquery = (query) ? "?" + this.buildQuery(query) : "";
         var message = {
-          method: "POST",
-          action: api,
-          parameters: {
-            oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.consumerKey,
-            oauth_token: this.accessor.token // Access Token
-          }
+            method: "GET",
+            action: api + btquery,
+            parameters: {
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_consumer_key: this.accessor.consumerKey,// queryの構築
+                oauth_token: this.accessor.token // Access Token
+            }
+        };
+        OAuth.setTimestampAndNonce(message);
+        OAuth.SignatureMethod.sign(message, this.accessor);
+        var target = OAuth.addToURL(message.action, message.parameters);
+        var options = {
+            method: message.method,
+            url: target,
+            onload: function (response) {
+                callback(null, response.responseText);
+            },
+            onerror: function (response) {
+                callback(response, response.responseText);
+            }
+        };
+        GM_xmlhttpRequest(options);
+    },
+    // DEPRECATED : use `postURL`
+    post: function (api, content, callback) {
+        var message = {
+            method: "POST",
+            action: api,
+            parameters: {
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_consumer_key: this.accessor.consumerKey,
+                oauth_token: this.accessor.token // Access Token
+            }
         };
         // 送信するデータをパラメータに追加する
-        for ( var key in content ) {
-          message.parameters[key] = content[key];
+        for (var key in content) {
+            message.parameters[key] = content[key];
         }
         OAuth.setTimestampAndNonce(message);
         OAuth.SignatureMethod.sign(message, this.accessor);
@@ -181,7 +212,7 @@ TwitterOauth.prototype = {
         var options = {
             method: message.method,
             url: target,
-            onload: function(d) {
+            onload: function (d) {
                 if (d.status == 200) {
                     if (callback) {
                         callback(d.responseText);
@@ -194,31 +225,63 @@ TwitterOauth.prototype = {
         };
         GM_xmlhttpRequest(options);
     },
+    postURL: function (api, content, callback) {
+        if (callback == null) {
+            throw new Error("must to set callback");
+        }
+        var message = {
+            method: "POST",
+            action: api,
+            parameters: {
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_consumer_key: this.accessor.consumerKey,
+                oauth_token: this.accessor.token // Access Token
+            }
+        };
+        // 送信するデータをパラメータに追加する
+        for (var key in content) {
+            message.parameters[key] = content[key];
+        }
+        OAuth.setTimestampAndNonce(message);
+        OAuth.SignatureMethod.sign(message, this.accessor);
+        var target = OAuth.addToURL(message.action, message.parameters);
+        var options = {
+            method: message.method,
+            url: target,
+            onload: function (response) {
+                callback(null, response.responseText);
+            },
+            onerror: function (response) {
+                callback(response, response.responseText);
+            }
+        };
+        GM_xmlhttpRequest(options);
+    },
     // GM_xmlhttpRequest風に使う
     // http://gist.github.com/511308
-    xhr : function(opts){
-        if(!(opts && opts.url && opts.method)){
+    xhr: function (opts) {
+        if (!(opts && opts.url && opts.method)) {
             GM_log("URL or method is missing.");
             return;
         }
         var message = {
-          method: opts.method,
-          action: opts.url,
-          parameters: {
-            oauth_signature_method: "HMAC-SHA1",
-            oauth_consumer_key: this.accessor.consumerKey,
-            oauth_token: this.accessor.token // Access Token
-          }
+            method: opts.method,
+            action: opts.url,
+            parameters: {
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_consumer_key: this.accessor.consumerKey,
+                oauth_token: this.accessor.token // Access Token
+            }
         };
         // POST - opts.dataは文字列でもオブジェクトでも可能にする
-        if(opts && opts.method.toLowerCase() == "post" && opts.data){
-            if(typeof(opts.data) === "string"){// 文字列からパラメータオブジェクトを作る
+        if (opts && opts.method.toLowerCase() == "post" && opts.data) {
+            if (typeof(opts.data) === "string") {// 文字列からパラメータオブジェクトを作る
                 opts.data = this.getParameter(opts.data);
             }
             var content = opts.data;// オブジェクトに変換したもの
             opts.data = null;// 元々のdataを消す
-            if(typeof(content) === "object"){
-                for(var key in content) {
+            if (typeof(content) === "object") {
+                for (var key in content) {
                     message.parameters[key] = content[key];
                 }
             }
@@ -230,13 +293,13 @@ TwitterOauth.prototype = {
     },
     // utility関数
     // http://kevin.vanzonneveld.net
-    urlencode : function (str) {
-        str = (str+'').toString();
+    urlencode: function (str) {
+        str = (str + '').toString();
         return encodeURIComponent(str).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').
-               replace(/\)/g, '%29').replace(/\*/g, '%2A').replace(/%20/g, '+');
+            replace(/\)/g, '%29').replace(/\*/g, '%2A').replace(/%20/g, '+');
     },
     // オブジェクトからクエリを生成
-    buildQuery : function(formdata, numeric_prefix, arg_separator) {
+    buildQuery: function (formdata, numeric_prefix, arg_separator) {
         // *     example 1: http_build_query({foo: 'bar', php: 'hypertext processor', baz: 'boom', cow: 'milk'}, '', '&amp;');
         // *     returns 1: 'foo=bar&amp;php=hypertext+processor&amp;baz=boom&amp;cow=milk'
         // *     example 2: http_build_query({'php': 'hypertext processor', 0: 'foo', 1: 'bar', 2: 'baz', 3: 'boom', 'cow': 'milk'}, 'myvar_');
@@ -277,20 +340,22 @@ TwitterOauth.prototype = {
         return tmp.join(arg_separator);
     },
     // Query String から 連想配列を返す
-    getParameter: function(str){
+    getParameter: function (str) {
         var dec = decodeURIComponent;
         var par = {}, itm;
-        if(typeof(str) == 'undefined') return par;
-        if(str.indexOf('?', 0) > -1){
+        if (typeof(str) == 'undefined') {
+            return par;
+        }
+        if (str.indexOf('?', 0) > -1) {
             str = str.split('?')[1]
         }
         str = str.split('&');
-        for(var i = 0; str.length > i; i++){
+        for (var i = 0; str.length > i; i++) {
             itm = str[i].split("=");
-            if(itm[0] != ''){
+            if (itm[0] != '') {
                 par[itm[0]] = typeof(itm[1]) == 'undefined' ? true : dec(itm[1]);
             }
         }
         return par;
-   }
+    }
 };
